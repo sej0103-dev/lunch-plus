@@ -61,17 +61,25 @@ function renderMenus(){
  $('menulist').innerHTML=list.length?list.map((m,i)=>`<button class="menu ${choice===m?'selected':''}" data-menu="${esc(m)}">${category==='도시락'?'<div class="lunch-box">🍱</div>':`<img src="assets/${imgs[i]||''}" alt="${esc(m)}">`}<div class="menuinfo"><div class="menuname">${esc(m)}</div><div class="pick">${choice===m?'✓ 선택됨':'메뉴 선택하기 →'}</div></div></button>`).join(''):'<div class="empty" style="grid-column:1/-1">이 요일에는 등록된 메뉴가 없습니다.</div>';
  $('menulist').querySelectorAll('.menu').forEach(b=>b.onclick=()=>{choice=b.dataset.menu;renderMenus();renderNotice()});
 }
+
 function renderNotice(){
- const n=person(),existing=orders.find(o=>o.menu_date===key(selected)&&n&&o.normalized_name===normalized(n)),closed=settings[key(selected)]?.is_closed;
- let msg='',cls='notice';
- if(!db){msg='사이트 관리자가 데이터베이스 연결을 완료해야 주문할 수 있습니다.';cls+=' error'}
- else if(!n)msg='이름을 입력하고 원하는 메뉴를 선택해 주세요.';
- else if(closed){msg='이 날짜는 주문이 마감되었습니다.';cls+=' error'}
- else if(existing){msg=`${n}님은 이미 "${existing.menu_name}"을(를) 선택했습니다. 하루 한 번만 선택할 수 있습니다.`;cls+=' success'}
- else msg=`${n}님 · ${fmt(selected)} ${day(selected)}요일 · ${choice} 선택 예정`;
- $('notice').className=cls;$('notice').textContent=msg;
- $('submit').disabled=!db||!n||!choice||!!existing||!!closed||busy;
+  const n=person(),existing=orders.find(o=>o.menu_date===key(selected)&&n&&o.normalized_name===normalized(n)),closed=settings[key(selected)]?.is_closed;
+  let msg='',cls='notice';
+  if(!db){msg='사이트 관리자가 데이터베이스 연결을 완료해야 주문할 수 있습니다.';cls+=' error'}
+  else if(!n)msg='이름을 입력하고 원하는 메뉴를 선택해 주세요.';
+  else if(closed){msg='이 날짜는 주문이 마감되었습니다.';cls+=' error'}
+  else if(existing){
+    msg=existing.menu_name===choice
+      ? `${n}님은 이미 이 메뉴를 선택했습니다.`
+      : `${n}님 · 기존 ${existing.menu_name} → 변경할 메뉴 ${choice}`;
+    cls+=' success';
+  }
+  else msg=`${n}님 · ${fmt(selected)} ${day(selected)}요일 · ${choice} 선택 예정`;
+  $('notice').className=cls;
+  $('notice').textContent=msg;
+  $('submit').disabled=!db||!n||!choice||!!closed||busy;
 }
+
 function renderRecords(){
  let list=orders.filter(o=>o.menu_date===key(selected)).sort((a,b)=>a.created_at.localeCompare(b.created_at));
  $('count').textContent=`${list.length}명 선택`;
@@ -100,14 +108,48 @@ async function load(){
  if(o.error||s.error){console.error(o.error||s.error);toast('데이터를 불러오지 못했습니다.');return}
  orders=o.data||[];settings=Object.fromEntries((s.data||[]).map(x=>[x.menu_date,x]));render();
 }
+
 async function submit(){
- const n=person();if(!db||!n||busy)return;
- busy=true;renderNotice();
- const {error}=await db.from('lunch_orders').insert({menu_date:key(selected),name:n,category,menu_name:choice});
- busy=false;
- if(error){toast(error.code==='23505'?'이미 해당 날짜에 선택한 이름입니다.':error.code==='P0001'?'주문이 마감되었습니다.':'저장 실패: 잠시 후 다시 시도해 주세요.');await load();return}
- toast('점심 메뉴 선택이 완료되었습니다!');await load();
+  const n=person();
+  if(!db||!n||busy)return;
+
+  const existing=mine();
+  if(existing&&existing.menu_name===choice){
+    toast('이미 선택된 메뉴입니다.');
+    return;
+  }
+
+  busy=true;
+  renderNotice();
+
+  let error;
+
+  if(existing){
+    ({error}=await db.from('lunch_orders')
+      .update({category,menu_name:choice})
+      .eq('id',existing.id));
+  }else{
+    ({error}=await db.from('lunch_orders')
+      .insert({
+        menu_date:key(selected),
+        name:n,
+        category,
+        menu_name:choice
+      }));
+  }
+
+  busy=false;
+
+  if(error){
+    toast('저장 실패: 잠시 후 다시 시도해 주세요.');
+    await load();
+    return;
+  }
+
+  toast(existing?'점심 메뉴 변경이 완료되었습니다!':'점심 메뉴 선택이 완료되었습니다!');
+  await load();
 }
+
 async function adminSignIn(){
  const {error}=await db.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPassword').value});
  if(error){toast('로그인 정보를 확인해 주세요.');return}
