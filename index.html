@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173c32">
+<title>Lunch Plus | 점심 메뉴 선택</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brandmark">🍴</span><span>LUNCH <b>PLUS</b></span></div><span class="topnote">WEEKLY MENU · ORDER</span></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">WOORI FOOD · WEEKLY MENU</div><h1>오늘 점심은<br class="mobile"> 무엇으로 할까요?</h1><p>이름을 입력하고 요일별 메뉴를 선택해 주세요.</p></section>
+<section class="namebox card">
+ <label for="person">이름</label><div class="namefield"><input id="person" maxlength="30" autocomplete="name" placeholder="이름을 입력해 주세요"><span class="lock">1인 1일 1메뉴</span></div>
+ <p class="hint">같은 날짜에는 동일한 이름으로 한 번만 선택할 수 있습니다.</p>
+</section>
+<section class="card weekcard">
+ <div class="week-head"><button id="prev" class="arrow" aria-label="이전 주">‹</button><div><div id="weeklabel" class="weeklabel"></div><div class="weekcaption">월요일 – 금요일</div></div><button id="next" class="arrow" aria-label="다음 주">›</button></div>
+ <div id="days" class="days"></div>
+</section>
+<section class="menu-section">
+ <div class="section-heading"><div><div class="eyebrow green">CHOOSE YOUR LUNCH</div><h2 id="dateheading">월요일 메뉴</h2></div><span id="datepill" class="datepill"></span></div>
+ <div class="tabs" id="tabs">
+  <button class="tab active" data-cat="도시락"><span>🍱</span>도시락</button>
+  <button class="tab" data-cat="샐러드 & 포케"><span>🥗</span>샐러드 & 포케</button>
+  <button class="tab" data-cat="샌드위치"><span>🥪</span>샌드위치</button>
+  <button class="tab" data-cat="하프&하프"><span>🥙</span>하프&하프</button>
+ </div>
+ <div id="menulist" class="menus"></div>
+ <div id="notice" class="notice">이름을 입력한 후 메뉴를 선택해 주세요.</div>
+ <button id="submit" class="submit" disabled>선택 완료하기 <span>→</span></button>
+ <p class="footnote">선택 완료 후에는 중복 선택 방지를 위해 직접 변경할 수 없습니다. 변경이 필요하면 담당자에게 문의해 주세요.</p>
+</section>
+<section class="card status">
+ <div class="status-head"><div><div class="eyebrow green">ORDER STATUS</div><h2>선택 현황</h2></div><span id="count" class="count">0명 선택</span></div>
+ <div id="records" class="records"><div class="empty">아직 선택한 사람이 없습니다.</div></div>
+</section>
+<section class="card admin">
+ <div class="status-head"><div><div class="eyebrow green">MANAGER ONLY</div><h2>관리자 관리</h2></div><span id="adminState" class="count">로그아웃</span></div>
+ <div id="adminLogin" class="admin-login">
+  <p class="hint">관리자 계정으로 로그인하면 주문 마감, 주문 취소, 엑셀용 CSV 다운로드를 관리할 수 있습니다.</p>
+  <input id="adminEmail" type="email" autocomplete="username" placeholder="관리자 이메일">
+  <input id="adminPassword" type="password" autocomplete="current-password" placeholder="비밀번호">
+  <button id="adminSignIn" class="submit">관리자 로그인</button>
+ </div>
+ <div id="adminTools" hidden>
+  <div class="admin-actions">
+   <button id="toggleClose" class="admin-btn">이 날짜 주문 마감/해제</button>
+   <button id="exportCsv" class="admin-btn">선택 현황 CSV 다운로드</button>
+   <button id="adminSignOut" class="admin-btn secondary">로그아웃</button>
+  </div>
+  <p id="closeState" class="hint"></p>
+  <div id="adminOrderList" class="admin-orders"></div>
+ </div>
+</section>
+<footer>Lunch Plus · Woori Food <span>점심 메뉴 주문 서비스</span></footer>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body></html>

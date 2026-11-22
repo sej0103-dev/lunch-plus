@@ -1,0 +1,142 @@
+(() => {
+const $=id=>document.getElementById(id);
+const days=['월','화','수','목','금'];
+const menu={
+'월':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['케이준 치킨','새우','연어롤'],'샌드위치':['어니언 크래미','떡갈비'],'하프&하프':['샐러드 + 어니언 크래미 1/2','샐러드 + 떡갈비 1/2']},
+'화':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['리코타치즈','또띠아','매콤소불고기 포케'],'샌드위치':['통새우','매콤닭가슴살'],'하프&하프':['샐러드 + 통새우 1/2','샐러드 + 매콤닭가슴살 1/2']},
+'수':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['훈제오리','갈릭닭가슴살 스테이크','생연어 포케'],'샌드위치':['에그 베이컨','크랜베리 닭가슴살'],'하프&하프':['샐러드 + 에그 베이컨 1/2','샐러드 + 크랜베리 닭가슴살 1/2']},
+'목':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['리코타치즈','연어','간장목살 포케'],'샌드위치':['스크램블 당근라페','소불고기'],'하프&하프':['샐러드 + 스크램블 당근라페 1/2','샐러드 + 소불고기 1/2']},
+'금':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['케이준 치킨','새우','버섯 닭가슴살 소세지'],'샌드위치':['햄치즈에그','텐더롤'],'하프&하프':['샐러드 + 햄치즈에그 1/2','샐러드 + 텐더롤 1/2']}
+};
+const photos={
+'샐러드 & 포케':{'월':['salad_1_1.jpg','salad_1_2.jpg','salad_1_3.jpg'],'화':['salad_2_1.jpg','salad_2_2.jpg','salad_2_3.jpg'],'수':['salad_3_1.jpg','salad_3_2.jpg','salad_3_3.jpg'],'목':['salad_4_1.jpg','salad_4_2.jpg','salad_4_3.jpg'],'금':['salad_5_1.jpg','salad_5_2.jpg','salad_5_3.jpg']},
+'샌드위치':{'월':['sandwich_1_1.jpg','sandwich_1_2.jpg'],'화':['sandwich_2_1.jpg','sandwich_2_2.jpg'],'수':['sandwich_3_1.jpg','sandwich_3_2.jpg'],'목':['sandwich_4_1.jpg','sandwich_4_2.jpg'],'금':['sandwich_5_1.jpg','sandwich_5_2.jpg']},
+'하프&하프':{'월':['half_1_1.jpg','half_1_2.jpg'],'화':['half_2_1.jpg','half_2_2.jpg'],'수':['half_3_1.jpg','half_3_2.jpg'],'목':['half_4_1.jpg','half_4_2.jpg'],'금':['half_5_1.jpg','half_5_2.jpg']}
+};
+const cats=['도시락','샐러드 & 포케','샌드위치','하프&하프'];
+const fmt=d=>`${d.getMonth()+1}월 ${d.getDate()}일`;
+const add=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x};
+const monday=d=>{let x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-(x.getDay()+6)%7);return x};
+const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const day=d=>days[(d.getDay()+6)%7];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const config=window.LUNCH_CONFIG||{};
+let db=null,orders=[],settings={},category='도시락',choice='오늘의 도시락',admin=false,busy=false;
+const today=new Date();today.setHours(0,0,0,0);
+let week=monday(today);if(today.getDay()===0||today.getDay()===6)week=add(week,7);
+let selected=new Date(week);
+const person=()=>$('person').value.trim().replace(/\s+/g,' ');
+const normalized=n=>n.trim().replace(/\s+/g,' ').toLocaleLowerCase('ko-KR');
+const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
+function toast(s){let t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+function renderWeek(){
+ $('weeklabel').textContent=`${fmt(week)} – ${fmt(add(week,4))}`;
+ $('days').innerHTML=days.map((d,i)=>{let dt=add(week,i),has=orders.some(o=>o.menu_date===key(dt)&&person()&&o.normalized_name===normalized(person()));return `<button class="day ${key(dt)===key(selected)?'active':''}" data-date="${key(dt)}"><span class="dn">${d}요일</span><span class="dt">${dt.getMonth()+1}/${dt.getDate()}</span><span class="mark">${has?'✓ 선택완료':key(dt)===key(today)?'오늘':'선택하기'}</span></button>`}).join('');
+ document.querySelectorAll('.day').forEach(b=>b.onclick=()=>{selected=new Date(b.dataset.date+'T12:00:00');category='도시락';choice='오늘의 도시락';render()});
+}
+function renderMenus(){
+ const list=menu[day(selected)][category]||[],imgs=photos[category]?.[day(selected)]||[];
+ $('tabs').querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.cat===category));
+ $('menulist').innerHTML=list.length?list.map((m,i)=>`<button class="menu ${choice===m?'selected':''}" data-menu="${esc(m)}">${category==='도시락'?'<div class="lunch-box">🍱</div>':`<img src="assets/${imgs[i]||''}" alt="${esc(m)}">`}<div class="menuinfo"><div class="menuname">${esc(m)}</div><div class="pick">${choice===m?'✓ 선택됨':'메뉴 선택하기 →'}</div></div></button>`).join(''):'<div class="empty" style="grid-column:1/-1">이 요일에는 등록된 메뉴가 없습니다.</div>';
+ $('menulist').querySelectorAll('.menu').forEach(b=>b.onclick=()=>{choice=b.dataset.menu;renderMenus();renderNotice()});
+}
+function renderNotice(){
+ const n=person(),existing=orders.find(o=>o.menu_date===key(selected)&&n&&o.normalized_name===normalized(n)),closed=settings[key(selected)]?.is_closed;
+ let msg='',cls='notice';
+ if(!db){msg='사이트 관리자가 데이터베이스 연결을 완료해야 주문할 수 있습니다.';cls+=' error'}
+ else if(!n)msg='이름을 입력하고 원하는 메뉴를 선택해 주세요.';
+ else if(closed){msg='이 날짜는 주문이 마감되었습니다.';cls+=' error'}
+ else if(existing){msg=`${n}님은 이미 "${existing.menu_name}"을(를) 선택했습니다. 하루 한 번만 선택할 수 있습니다.`;cls+=' success'}
+ else msg=`${n}님 · ${fmt(selected)} ${day(selected)}요일 · ${choice} 선택 예정`;
+ $('notice').className=cls;$('notice').textContent=msg;
+ $('submit').disabled=!db||!n||!choice||!!existing||!!closed||busy;
+}
+function renderRecords(){
+ let list=orders.filter(o=>o.menu_date===key(selected)).sort((a,b)=>a.created_at.localeCompare(b.created_at));
+ $('count').textContent=`${list.length}명 선택`;
+ $('records').innerHTML=list.length?list.map(o=>`<div class="record"><div><div class="record-name">${esc(o.name)}</div><div class="record-menu">${esc(o.menu_name)}</div></div><span class="record-cat">${esc(o.category)}</span></div>`).join(''):'<div class="empty">아직 선택한 사람이 없습니다.</div>';
+}
+function renderAdmin(){
+ $('adminState').textContent=admin?'관리자 로그인':'로그아웃';
+ $('adminLogin').hidden=admin;$('adminTools').hidden=!admin;
+ if(!admin)return;
+ const closed=!!settings[key(selected)]?.is_closed;
+ $('toggleClose').textContent=closed?'이 날짜 주문 다시 열기':'이 날짜 주문 마감하기';
+ $('closeState').textContent=`${fmt(selected)} ${day(selected)}요일 주문 상태: ${closed?'마감':'주문 가능'}`;
+ const list=orders.filter(o=>o.menu_date===key(selected));
+ $('adminOrderList').innerHTML=list.length?list.map(o=>`<div class="admin-order"><div><b>${esc(o.name)}</b><small>${esc(o.menu_name)} · ${esc(o.category)}</small></div><div class="admin-buttons"><button class="admin-btn edit" data-id="${o.id}">수정</button><button class="admin-btn danger" data-del="${o.id}">취소</button></div></div>`).join(''):'<p class="hint">이 날짜 주문이 없습니다.</p>';
+ $('adminOrderList').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>cancelOrder(b.dataset.del));
+ $('adminOrderList').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>editOrder(b.dataset.id));
+}
+function render(){ $('dateheading').textContent=`${day(selected)}요일 메뉴`; $('datepill').textContent=fmt(selected);renderWeek();renderMenus();renderNotice();renderRecords();renderAdmin()}
+async function load(){
+ if(!db)return;
+ const from=key(week),to=key(add(week,4));
+ const [o,s]=await Promise.all([
+  db.from('lunch_orders').select('*').gte('menu_date',from).lte('menu_date',to).order('created_at'),
+  db.from('lunch_date_settings').select('*').gte('menu_date',from).lte('menu_date',to)
+ ]);
+ if(o.error||s.error){console.error(o.error||s.error);toast('데이터를 불러오지 못했습니다.');return}
+ orders=o.data||[];settings=Object.fromEntries((s.data||[]).map(x=>[x.menu_date,x]));render();
+}
+async function submit(){
+ const n=person();if(!db||!n||busy)return;
+ busy=true;renderNotice();
+ const {error}=await db.from('lunch_orders').insert({menu_date:key(selected),name:n,category,menu_name:choice});
+ busy=false;
+ if(error){toast(error.code==='23505'?'이미 해당 날짜에 선택한 이름입니다.':error.code==='P0001'?'주문이 마감되었습니다.':'저장 실패: 잠시 후 다시 시도해 주세요.');await load();return}
+ toast('점심 메뉴 선택이 완료되었습니다!');await load();
+}
+async function adminSignIn(){
+ const {error}=await db.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPassword').value});
+ if(error){toast('로그인 정보를 확인해 주세요.');return}
+ const {data,isAdminError}=await db.rpc('is_lunch_admin');
+ if(isAdminError||data!==true){await db.auth.signOut();toast('관리자 권한이 등록된 계정이 아닙니다.');return}
+ admin=true;renderAdmin();toast('관리자로 로그인했습니다.');
+}
+async function adminSignOut(){await db.auth.signOut();admin=false;renderAdmin();toast('로그아웃했습니다.')}
+async function toggleClose(){
+ const date=key(selected),closed=!!settings[date]?.is_closed;
+ const {error}=await db.from('lunch_date_settings').upsert({menu_date:date,is_closed:!closed,updated_at:new Date().toISOString()});
+ if(error){toast('마감 상태 변경 실패: 관리자 권한을 확인해 주세요.');return}
+ toast(!closed?'해당 날짜 주문을 마감했습니다.':'주문을 다시 열었습니다.');await load();
+}
+async function cancelOrder(id){
+ if(!confirm('이 주문을 취소할까요?'))return;
+ const {error}=await db.from('lunch_orders').delete().eq('id',id);
+ if(error){toast('주문 취소에 실패했습니다.');return}toast('주문을 취소했습니다.');await load();
+}
+async function editOrder(id){
+ const row=orders.find(o=>String(o.id)===String(id));if(!row)return;
+ const name=prompt('이름을 수정하세요.',row.name);if(name===null)return;
+ const menuName=prompt('메뉴명을 수정하세요.',row.menu_name);if(menuName===null)return;
+ if(!name.trim()||!menuName.trim()){toast('이름과 메뉴를 입력해 주세요.');return}
+ const {error}=await db.from('lunch_orders').update({name:name.trim(),menu_name:menuName.trim()}).eq('id',id);
+ if(error){toast('수정 실패: 동일한 이름의 주문이 있는지 확인해 주세요.');return}toast('주문을 수정했습니다.');await load();
+}
+function exportCsv(){
+ const list=orders.filter(o=>o.menu_date===key(selected));
+ const rows=[['날짜','이름','분류','메뉴','선택시간'],...list.map(o=>[o.menu_date,o.name,o.category,o.menu_name,o.created_at])];
+ const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ const a=document.createElement('a'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+ a.href=url;a.download=`lunch-orders-${key(selected)}.csv`;a.click();URL.revokeObjectURL(url);
+}
+async function init(){
+ const valid=config.SUPABASE_URL&&config.SUPABASE_ANON_KEY&&!config.SUPABASE_URL.includes('YOUR_')&&!config.SUPABASE_ANON_KEY.includes('YOUR_')&&window.supabase;
+ if(valid){
+  db=window.supabase.createClient(config.SUPABASE_URL,config.SUPABASE_ANON_KEY);
+  const {data:{session}}=await db.auth.getSession();
+  if(session){const {data}=await db.rpc('is_lunch_admin');admin=data===true}
+  await load();
+  db.channel('lunch-live').on('postgres_changes',{event:'*',schema:'public',table:'lunch_orders'},load).on('postgres_changes',{event:'*',schema:'public',table:'lunch_date_settings'},load).subscribe();
+ }
+ $('person').addEventListener('input',render);
+ $('prev').onclick=()=>{week=add(week,-7);selected=add(selected,-7);render();load()};
+ $('next').onclick=()=>{week=add(week,7);selected=add(selected,7);render();load()};
+ $('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{category=b.dataset.cat;choice=(menu[day(selected)][category]||[])[0]||'';renderMenus();renderNotice()});
+ $('submit').onclick=submit;
+ $('adminSignIn').onclick=adminSignIn;$('adminSignOut').onclick=adminSignOut;$('toggleClose').onclick=toggleClose;$('exportCsv').onclick=exportCsv;
+ render();
+}
+init();
+})();
