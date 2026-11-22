@@ -8,11 +8,31 @@ const menu={
 '목':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['리코타치즈','연어','간장목살 포케'],'샌드위치':['스크램블 당근라페','소불고기'],'하프&하프':['샐러드 + 스크램블 당근라페 1/2','샐러드 + 소불고기 1/2']},
 '금':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['케이준 치킨','새우','버섯 닭가슴살 소세지'],'샌드위치':['햄치즈에그','텐더롤'],'하프&하프':['샐러드 + 햄치즈에그 1/2','샐러드 + 텐더롤 1/2']}
 };
-const photos={
-'샐러드 & 포케':{'월':['salad_1_1.jpg','salad_1_2.jpg','salad_1_3.jpg'],'화':['salad_2_1.jpg','salad_2_2.jpg','salad_2_3.jpg'],'수':['salad_3_1.jpg','salad_3_2.jpg','salad_3_3.jpg'],'목':['salad_4_1.jpg','salad_4_2.jpg','salad_4_3.jpg'],'금':['salad_5_1.jpg','salad_5_2.jpg','salad_5_3.jpg']},
-'샌드위치':{'월':['sandwich_1_1.jpg','sandwich_1_2.jpg'],'화':['sandwich_2_1.jpg','sandwich_2_2.jpg'],'수':['sandwich_3_1.jpg','sandwich_3_2.jpg'],'목':['sandwich_4_1.jpg','sandwich_4_2.jpg'],'금':['sandwich_5_1.jpg','sandwich_5_2.jpg']},
-'하프&하프':{'월':['half_1_1.jpg','half_1_2.jpg'],'화':['half_2_1.jpg','half_2_2.jpg'],'수':['half_3_1.jpg','half_3_2.jpg'],'목':['half_4_1.jpg','half_4_2.jpg'],'금':['half_5_1.jpg','half_5_2.jpg']}
+
+const photos = {
+  '샐러드 & 포케': {
+    '월': ['Cajun-Chicken-Salad.jpg', 'Shrimp-Salad.jpg', 'Salmon-Roll-Salad.jpg'],
+    '화': ['Ricotta-Cheese-Salad.jpg', 'Tortilla-Salad.jpg', 'Spicy-Beef-Bulgogi-Poke.jpg'],
+    '수': ['Smoked-Duck-Salad.jpg', 'Garlic-Chicken Breast-Steak-Salad.jpg', 'Fresh-salmon-poke.jpg'],
+    '목': ['Ricotta-Cheese-Salad.jpg', 'Salmon-Salad.jpg', 'Soy-Sauce-Pork-Neck-Poke.jpg'],
+    '금': ['Cajun-Chicken-Salad.jpg', 'Shrimp-Salad.jpg', 'Mushroom-Chicken-Breast-Sausage-Salad.jpg']
+  },
+  '샌드위치': {
+    '월': ['Onion-Creamy-Sandwich.jpg', 'Tteokgalbi-Sandwich.jpg'],
+    '화': ['Whole-Shrimp-Sandwich.jpg', 'Spicy-Chicken-Breast-Sandwich.jpg'],
+    '수': ['Egg-Bacon-Sandwich.jpg', 'Cranberry-Chicken-Breast-Sandwich.jpg'],
+    '목': ['Scrambled-Carrot-Lape-Sandwich.jpg', 'Bulgogi-Sandwich.jpg'],
+    '금': ['HamCheese-and-Egg-Sandwich.jpg', 'Tender-roll.jpg']
+  },
+  '하프&하프': {
+    '월': ['Half-Onion-Creamy.jpg', 'Half-Tteokgalbi.jpg'],
+    '화': ['Half-Whole-Shrimp.jpg', 'Half-Spicy-Chicken-Breast.jpg'],
+    '수': ['Half-Egg Bacon.jpg', 'Half-Cranberry-Chicken-Breast.jpg'],
+    '목': ['Half-Scrambled-Carrot-Lafe.jpg', 'Half-Bulgogi.jpg'],
+    '금': ['Half-HamCheese-Egg.jpg', 'Half-Tender-Roll.jpg']
+  }
 };
+
 const cats=['도시락','샐러드 & 포케','샌드위치','하프&하프'];
 const fmt=d=>`${d.getMonth()+1}월 ${d.getDate()}일`;
 const add=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x};
