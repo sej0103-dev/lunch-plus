@@ -126,7 +126,7 @@ function renderMenus(){
      ? `<div class="lunch-box" style="
           display:flex;
           flex-direction:column;
-          align-items:flex-start;
+          align-items:center;
           justify-content:center;
           gap:5px;
           box-sizing:border-box;
