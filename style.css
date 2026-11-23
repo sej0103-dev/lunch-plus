@@ -29,3 +29,8 @@ footer{display:flex;justify-content:space-between;color:#9aa39d;font-size:10px;p
   color: #e05252 !important;
   font-weight: 700;
 }
+.day-off-badge {
+  color: #e05252 !important;
+  background: #fff0f0 !important;
+  font-weight: 700;
+}
