@@ -140,10 +140,40 @@ const person=()=>$('person').value.trim().replace(/\s+/g,' ');
 const normalized=n=>n.trim().replace(/\s+/g,' ').toLocaleLowerCase('ko-KR');
 const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
 function toast(s){let t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+
 function renderWeek(){
  $('weeklabel').textContent=`${fmt(week)} – ${fmt(add(week,4))}`;
- $('days').innerHTML=days.map((d,i)=>{let dt=add(week,i),has=orders.some(o=>o.menu_date===key(dt)&&person()&&o.normalized_name===normalized(person()));return `<button class="day ${key(dt)===key(selected)?'active':''}" data-date="${key(dt)}"><span class="dn">${d}요일</span><span class="dt">${dt.getMonth()+1}/${dt.getDate()}</span><span class="mark">${has?'✓ 선택완료':key(dt)===key(today)?'오늘':'선택하기'}</span></button>`}).join('');
- document.querySelectorAll('.day').forEach(b=>b.onclick=()=>{selected=new Date(b.dataset.date+'T12:00:00');category='도시락';choice='오늘의 도시락';render()});
+
+ $('days').innerHTML=days.map((d,i)=>{
+   let dt=add(week,i);
+   let holiday=holidays[key(dt)];
+   let has=orders.some(o=>
+     o.menu_date===key(dt)&&person()&&
+     o.normalized_name===normalized(person())
+   );
+
+   return `<button
+     class="day ${key(dt)===key(selected)?'active':''}"
+     data-date="${key(dt)}"
+     ${holiday?'disabled':''}
+     style="${holiday?'color:#d32f2f;background:#fff1f1;border-color:#ffcaca;opacity:1;cursor:not-allowed;':''}"
+   >
+     <span class="dn" style="${holiday?'color:#d32f2f;':''}">${d}요일</span>
+     <span class="dt" style="${holiday?'color:#d32f2f;':''}">${dt.getMonth()+1}/${dt.getDate()}</span>
+     <span class="mark" style="${holiday?'color:#d32f2f;':''}">
+       ${holiday|| (has?'✓ 선택완료':key(dt)===key(today)?'오늘':'선택하기')}
+     </span>
+   </button>`;
+ }).join('');
+
+ document.querySelectorAll('.day:not(:disabled)').forEach(b=>{
+   b.onclick=()=>{
+     selected=new Date(b.dataset.date+'T12:00:00');
+     category='도시락';
+     choice='오늘의 도시락';
+     render();
+   };
+ });
 }
 
 function renderMenus(){
@@ -218,6 +248,10 @@ function renderNotice(){
   const n=person(),existing=orders.find(o=>o.menu_date===key(selected)&&n&&o.normalized_name===normalized(n)),closed=settings[key(selected)]?.is_closed;
   let msg='',cls='notice';
   if(!db){msg='사이트 관리자가 데이터베이스 연결을 완료해야 주문할 수 있습니다.';cls+=' error'}
+  else if(holidays[key(selected)]){
+  msg=`${holidays[key(selected)]}에는 주문할 수 없습니다.`;
+  cls+=' error';
+}
   else if(!n)msg='이름을 입력하고 원하는 메뉴를 선택해 주세요.';
   else if(closed){msg='이 날짜는 주문이 마감되었습니다.';cls+=' error'}
   else if(existing){
@@ -229,7 +263,7 @@ function renderNotice(){
   else msg=`${n}님 · ${fmt(selected)} ${day(selected)}요일 · ${choice} 선택 예정`;
   $('notice').className=cls;
   $('notice').textContent=msg;
-  $('submit').disabled=!db||!n||!choice||!!closed||busy;
+  $('submit').disabled=!db||!n||!choice||!!closed||busy||!!holidays[key(selected)];
 }
 
 
@@ -323,7 +357,14 @@ async function load(){
 
 async function submit(){
   const n=person();
+
+  if(holidays[key(selected)]){
+    toast('공휴일에는 주문할 수 없습니다.');
+    return;
+  }
+
   if(!db||!n||busy)return;
+
 
   const existing=mine();
   if(existing&&existing.menu_name===choice){
