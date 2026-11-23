@@ -39,7 +39,7 @@ const fmt=d=>`${d.getMonth()+1}월 ${d.getDate()}일`;
 const add=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x};
 const monday=d=>{let x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-(x.getDay()+6)%7);return x};
 const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-
+const day=d=>days[(d.getDay()+6)%7];
 // 주차별 도시락 식단
 // 키는 해당 주 월요일 날짜입니다.
 const lunchMenusByWeek = {
