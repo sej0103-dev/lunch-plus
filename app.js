@@ -176,63 +176,84 @@ function renderWeek(){
  });
 }
 
+
 function renderMenus(){
  const weekday=day(selected);
+ const isPersonalLeave=category==='개인 휴무';
  const list=menu[weekday][category]||[];
  const imgs=photos[category]?.[weekday]||[];
-
- // 선택한 날짜가 속한 주의 도시락 식단 가져오기
  const lunchDishes=lunchMenusByWeek[key(monday(selected))]?.[weekday];
 
  $('tabs').querySelectorAll('.tab').forEach(b=>
    b.classList.toggle('active',b.dataset.cat===category)
  );
 
- $('menulist').innerHTML=list.length
- ?list.map((m,i)=>{
-   const lunchContent=lunchDishes
-     ? `<div class="lunch-box" style="
-          display:flex;
-          flex-direction:column;
-          align-items:center;
-          justify-content:center;
-          gap:5px;
-          box-sizing:border-box;
-          width:100%;
-          height:auto;
-          min-height:170px;
-          padding:12px;
-          background:#fff8f0;
-          border-radius:12px;
-          text-align:center;
-        ">
-          ${lunchDishes.map(d=>`
-            <span style="
-              display:block;
-              width:100%;
-              font-size:clamp(11px,2vw,14px);
-              line-height:1.4;
-              word-break:keep-all;
-              overflow-wrap:anywhere;
-            ">${esc(d)}</span>
-          `).join('')}
-        </div>`
-     : '<div class="lunch-box">🍱</div>';
-
-   return `
-     <button class="menu ${choice===m?'selected':''}" data-menu="${esc(m)}">
-       ${category==='도시락'
-         ? lunchContent
-         : `<img src="assets/${imgs[i]||''}" alt="${esc(m)}">`
-       }
+ if(isPersonalLeave){
+   $('menulist').innerHTML=`
+     <button class="menu ${choice==='휴무'?'selected':''}" data-menu="휴무">
+       <div style="
+         display:flex;
+         align-items:center;
+         justify-content:center;
+         width:100%;
+         min-height:170px;
+         background:#fff1f1;
+         border-radius:12px;
+         font-size:48px;
+       ">🏖️</div>
        <div class="menuinfo">
-         <div class="menuname">${esc(m)}</div>
-         <div class="pick">${choice===m?'✓ 선택됨':'메뉴 선택하기 →'}</div>
+         <div class="menuname">개인 휴무</div>
+         <div class="pick">${choice==='휴무'?'✓ 선택됨':'휴무 선택하기 →'}</div>
        </div>
      </button>
    `;
- }).join('')
- : '<div class="empty" style="grid-column:1/-1">이 요일에는 등록된 메뉴가 없습니다.</div>';
+ }else{
+   $('menulist').innerHTML=list.length
+   ?list.map((m,i)=>{
+     const lunchContent=lunchDishes
+       ? `<div class="lunch-box" style="
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:5px;
+            box-sizing:border-box;
+            width:100%;
+            height:auto;
+            min-height:170px;
+            padding:12px;
+            background:#fff8f0;
+            border-radius:12px;
+            text-align:center;
+          ">
+            ${lunchDishes.map(d=>`
+              <span style="
+                display:block;
+                width:100%;
+                font-size:clamp(11px,2vw,14px);
+                line-height:1.4;
+                word-break:keep-all;
+                overflow-wrap:anywhere;
+              ">${esc(d)}</span>
+            `).join('')}
+          </div>`
+       : '<div class="lunch-box">🍱</div>';
+
+     return `
+       <button class="menu ${choice===m?'selected':''}" data-menu="${esc(m)}">
+         ${category==='도시락'
+           ? lunchContent
+           : `<img src="assets/${imgs[i]||''}" alt="${esc(m)}">`
+         }
+         <div class="menuinfo">
+           <div class="menuname">${esc(m)}</div>
+           <div class="pick">${choice===m?'✓ 선택됨':'메뉴 선택하기 →'}</div>
+         </div>
+       </button>
+     `;
+   }).join('')
+   : '<div class="empty" style="grid-column:1/-1">이 요일에는 등록된 메뉴가 없습니다.</div>';
+ }
 
  $('menulist').querySelectorAll('.menu').forEach(b=>{
    b.onclick=()=>{
@@ -242,7 +263,6 @@ function renderMenus(){
    };
  });
 }
-
 
 function renderNotice(){
   const n=person(),existing=orders.find(o=>o.menu_date===key(selected)&&n&&o.normalized_name===normalized(n)),closed=settings[key(selected)]?.is_closed;
@@ -275,13 +295,17 @@ function renderRecords(){
  $('count').textContent=`${list.length}명 선택`;
 
  // 메뉴별 주문 수량 계산
- const totals=Object.entries(
-   list.reduce((acc,o)=>{
+ 
+const totals=Object.entries(
+   list
+   .filter(o=>o.category!=='개인 휴무')
+   .reduce((acc,o)=>{
      const name=o.menu_name||'메뉴 미지정';
      acc[name]=(acc[name]||0)+1;
      return acc;
    },{})
  ).sort((a,b)=>a[0].localeCompare(b[0],'ko'));
+
 
  const recordsHtml=list.length
    ?list.map(o=>`
@@ -449,7 +473,16 @@ async function init(){
  $('person').addEventListener('input',render);
  $('prev').onclick=()=>{week=add(week,-7);selected=add(selected,-7);render();load()};
  $('next').onclick=()=>{week=add(week,7);selected=add(selected,7);render();load()};
- $('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{category=b.dataset.cat;choice=(menu[day(selected)][category]||[])[0]||'';renderMenus();renderNotice()});
+
+$('tabs').querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  category=b.dataset.cat;
+  choice=category==='개인 휴무'
+    ? '휴무'
+    : (menu[day(selected)][category]||[])[0]||'';
+  renderMenus();
+  renderNotice();
+});
+
  $('submit').onclick=submit;
  $('adminSignIn').onclick=adminSignIn;$('adminSignOut').onclick=adminSignOut;$('toggleClose').onclick=toggleClose;$('exportCsv').onclick=exportCsv;
  render();
