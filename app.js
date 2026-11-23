@@ -288,9 +288,20 @@ function renderNotice(){
 
 
 function renderRecords(){
- let list=orders
-   .filter(o=>o.menu_date===key(selected))
-   .sort((a,b)=>a.created_at.localeCompare(b.created_at));
+ 
+let list=orders
+  .filter(o=>o.menu_date===key(selected))
+  .sort((a,b)=>{
+    const aOff=a.category==='개인 휴무';
+    const bOff=b.category==='개인 휴무';
+
+    // 개인 휴무는 항상 맨 위로!
+    if(aOff!==bOff) return aOff ? -1 : 1;
+
+    // 같은 그룹 안에서는 기존 주문 순서 유지
+    return a.created_at.localeCompare(b.created_at);
+  });
+
 
  $('count').textContent=`${list.length}명 선택`;
 
