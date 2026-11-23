@@ -314,7 +314,7 @@ const totals=Object.entries(
          <div class="record-name">${esc(o.name)}</div>
          <div class="record-menu ${o.category==='개인 휴무'?'day-off-text':''}">${esc(o.menu_name)}</div>
        </div>
-       <span class="record-cat">${esc(o.category)}</span>
+       <span class="record-cat ${o.category==='개인 휴무'?'day-off-badge':''}">${esc(o.category)}</span>
      </div>
    `).join('')
    : '<div class="empty">아직 선택한 사람이 없습니다.</div>';
