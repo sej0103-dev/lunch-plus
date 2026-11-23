@@ -39,7 +39,59 @@ const fmt=d=>`${d.getMonth()+1}월 ${d.getDate()}일`;
 const add=(d,n)=>{let x=new Date(d);x.setDate(x.getDate()+n);return x};
 const monday=d=>{let x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-(x.getDay()+6)%7);return x};
 const key=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const day=d=>days[(d.getDay()+6)%7];
+
+// 주차별 도시락 식단
+// 키는 해당 주 월요일 날짜입니다.
+const lunchMenusByWeek = {
+  '2026-11-23': {
+    '월': [
+      '배추된장국',
+      '충청도식김치짜글이',
+      '탕수육&유자레몬소스',
+      '크림비엔나볶음',
+      '궁채절임',
+      '총각김치',
+      '명엽채'
+    ],
+    '화': [
+      '김치어묵국',
+      '소고기매콤짜장',
+      '집게다리튀김&타르타르소스',
+      '피망스크램블',
+      '파래무생채',
+      '김치',
+      '단호박찜&꿀'
+    ],
+    '수': [
+      '고추장참치두부찌개',
+      '오븐간장목살구이&초생강',
+      '명란계란찜',
+      '양념깻잎',
+      '양배추찜&쌈장',
+      '김치',
+      '도토리묵오이무침'
+    ],
+    '목': [
+      '소고기미역국',
+      '매콤훈제오리야채볶음',
+      '개성왕만두&간장',
+      '달달한두부조림',
+      '건새우마늘쫑',
+      '김치',
+      '와사비쌈무'
+    ],
+    '금': [
+      '얼큰소고기대파무국',
+      '미트볼&펜네토마토소스',
+      '치킨너겟',
+      '알감자조림',
+      '청포묵김무침',
+      '볶음김치',
+      '양상추샐러드&소스'
+    ]
+  }
+};
+
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const config=window.LUNCH_CONFIG||{};
 let db=null,orders=[],settings={},category='도시락',choice='오늘의 도시락',admin=false,busy=false;
@@ -55,12 +107,74 @@ function renderWeek(){
  $('days').innerHTML=days.map((d,i)=>{let dt=add(week,i),has=orders.some(o=>o.menu_date===key(dt)&&person()&&o.normalized_name===normalized(person()));return `<button class="day ${key(dt)===key(selected)?'active':''}" data-date="${key(dt)}"><span class="dn">${d}요일</span><span class="dt">${dt.getMonth()+1}/${dt.getDate()}</span><span class="mark">${has?'✓ 선택완료':key(dt)===key(today)?'오늘':'선택하기'}</span></button>`}).join('');
  document.querySelectorAll('.day').forEach(b=>b.onclick=()=>{selected=new Date(b.dataset.date+'T12:00:00');category='도시락';choice='오늘의 도시락';render()});
 }
+
 function renderMenus(){
- const list=menu[day(selected)][category]||[],imgs=photos[category]?.[day(selected)]||[];
- $('tabs').querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.cat===category));
- $('menulist').innerHTML=list.length?list.map((m,i)=>`<button class="menu ${choice===m?'selected':''}" data-menu="${esc(m)}">${category==='도시락'?'<div class="lunch-box">🍱</div>':`<img src="assets/${imgs[i]||''}" alt="${esc(m)}">`}<div class="menuinfo"><div class="menuname">${esc(m)}</div><div class="pick">${choice===m?'✓ 선택됨':'메뉴 선택하기 →'}</div></div></button>`).join(''):'<div class="empty" style="grid-column:1/-1">이 요일에는 등록된 메뉴가 없습니다.</div>';
- $('menulist').querySelectorAll('.menu').forEach(b=>b.onclick=()=>{choice=b.dataset.menu;renderMenus();renderNotice()});
+ const weekday=day(selected);
+ const list=menu[weekday][category]||[];
+ const imgs=photos[category]?.[weekday]||[];
+
+ // 선택한 날짜가 속한 주의 도시락 식단 가져오기
+ const lunchDishes=lunchMenusByWeek[key(monday(selected))]?.[weekday];
+
+ $('tabs').querySelectorAll('.tab').forEach(b=>
+   b.classList.toggle('active',b.dataset.cat===category)
+ );
+
+ $('menulist').innerHTML=list.length
+ ?list.map((m,i)=>{
+   const lunchContent=lunchDishes
+     ? `<div class="lunch-box" style="
+          display:flex;
+          flex-direction:column;
+          align-items:flex-start;
+          justify-content:center;
+          gap:5px;
+          box-sizing:border-box;
+          width:100%;
+          height:auto;
+          min-height:170px;
+          padding:12px;
+          background:#fff8f0;
+          border-radius:12px;
+          text-align:left;
+        ">
+          ${lunchDishes.map(d=>`
+            <span style="
+              display:block;
+              width:100%;
+              font-size:clamp(11px,2vw,14px);
+              line-height:1.4;
+              word-break:keep-all;
+              overflow-wrap:anywhere;
+            ">${esc(d)}</span>
+          `).join('')}
+        </div>`
+     : '<div class="lunch-box">🍱</div>';
+
+   return `
+     <button class="menu ${choice===m?'selected':''}" data-menu="${esc(m)}">
+       ${category==='도시락'
+         ? lunchContent
+         : `<img src="assets/${imgs[i]||''}" alt="${esc(m)}">`
+       }
+       <div class="menuinfo">
+         <div class="menuname">${esc(m)}</div>
+         <div class="pick">${choice===m?'✓ 선택됨':'메뉴 선택하기 →'}</div>
+       </div>
+     </button>
+   `;
+ }).join('')
+ : '<div class="empty" style="grid-column:1/-1">이 요일에는 등록된 메뉴가 없습니다.</div>';
+
+ $('menulist').querySelectorAll('.menu').forEach(b=>{
+   b.onclick=()=>{
+     choice=b.dataset.menu;
+     renderMenus();
+     renderNotice();
+   };
+ });
 }
+
 
 function renderNotice(){
   const n=person(),existing=orders.find(o=>o.menu_date===key(selected)&&n&&o.normalized_name===normalized(n)),closed=settings[key(selected)]?.is_closed;
