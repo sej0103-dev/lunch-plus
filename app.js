@@ -368,16 +368,82 @@ function renderAdmin(){
  $('adminOrderList').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>editOrder(b.dataset.id));
 }
 function render(){ $('dateheading').textContent=`${day(selected)}요일 메뉴`; $('datepill').textContent=fmt(selected);renderWeek();renderMenus();renderNotice();renderRecords();renderAdmin()}
-async function load(){
- if(!db)return;
- const from=key(week),to=key(add(week,4));
- const [o,s]=await Promise.all([
-  db.from('lunch_orders').select('*').gte('menu_date',from).lte('menu_date',to).order('created_at'),
-  db.from('lunch_date_settings').select('*').gte('menu_date',from).lte('menu_date',to)
- ]);
- if(o.error||s.error){console.error(o.error||s.error);toast('데이터를 불러오지 못했습니다.');return}
- orders=o.data||[];settings=Object.fromEntries((s.data||[]).map(x=>[x.menu_date,x]));render();
+
+async function ensureDirectorOrders(){
+  const directorName='원장님';
+  const directorKey=normalized(directorName);
+  const todayKey=key(new Date());
+
+  for(let i=0;i<5;i++){
+    const dt=add(week,i);
+    const date=key(dt);
+
+    // 지난 날짜, 공휴일, 마감 날짜는 제외
+    if(date<todayKey || holidays[date] || settings[date]?.is_closed){
+      continue;
+    }
+
+    // 이미 원장님 주문이 있으면 건너뛰기
+    const exists=orders.some(o=>
+      o.menu_date===date &&
+      o.normalized_name===directorKey
+    );
+
+    if(exists) continue;
+
+    const {data,error}=await db
+      .from('lunch_orders')
+      .insert({
+        menu_date:date,
+        name:directorName,
+        category:'도시락',
+        menu_name:'오늘의 도시락'
+      })
+      .select('*')
+      .single();
+
+    if(!error && data){
+      orders.push(data);
+    }else if(error?.code!=='23505'){
+      console.error('원장님 자동 주문 오류:',error);
+    }
+  }
 }
+
+async function load(){
+  if(!db)return;
+
+  const from=key(week),to=key(add(week,4));
+
+  const [o,s]=await Promise.all([
+    db.from('lunch_orders')
+      .select('*')
+      .gte('menu_date',from)
+      .lte('menu_date',to)
+      .order('created_at'),
+
+    db.from('lunch_date_settings')
+      .select('*')
+      .gte('menu_date',from)
+      .lte('menu_date',to)
+  ]);
+
+  if(o.error||s.error){
+    console.error(o.error||s.error);
+    toast('데이터를 불러오지 못했습니다.');
+    return;
+  }
+
+  orders=o.data||[];
+  settings=Object.fromEntries(
+    (s.data||[]).map(x=>[x.menu_date,x])
+  );
+
+  await ensureDirectorOrders();
+
+  render();
+}
+
 
 async function submit(){
   const n=person();
