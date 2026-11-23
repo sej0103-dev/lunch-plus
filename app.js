@@ -312,7 +312,7 @@ const totals=Object.entries(
      <div class="record">
        <div>
          <div class="record-name">${esc(o.name)}</div>
-         <div class="record-menu">${esc(o.menu_name)}</div>
+         <div class="record-menu ${o.category==='개인 휴무'?'day-off-text':''}">${esc(o.menu_name)}</div>
        </div>
        <span class="record-cat">${esc(o.category)}</span>
      </div>
