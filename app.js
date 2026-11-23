@@ -417,12 +417,12 @@ async function submit(){
 
   busy=false;
 
-  if(error){
-    toast('저장 실패: 잠시 후 다시 시도해 주세요.');
-    await load();
-    return;
-  }
-
+if(error){
+  console.error('Supabase 저장 오류:', error);
+  toast('저장 실패: 잠시 후 다시 시도해 주세요.');
+  await load();
+  return;
+}
   toast(existing?'점심 메뉴 변경이 완료되었습니다!':'점심 메뉴 선택이 완료되었습니다!');
   await load();
 }
