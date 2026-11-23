@@ -136,7 +136,7 @@ function renderMenus(){
           padding:12px;
           background:#fff8f0;
           border-radius:12px;
-          text-align:left;
+          text-align:center;
         ">
           ${lunchDishes.map(d=>`
             <span style="
