@@ -241,7 +241,7 @@ function renderRecords(){
        ${totals.map(([name,count])=>`
          <div style="
            display:flex;
-           justify-content:center;
+           justify-content:flex-start;
            align-items:center;
            gap:12px;
            padding:7px 0;
