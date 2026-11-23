@@ -194,11 +194,70 @@ function renderNotice(){
   $('submit').disabled=!db||!n||!choice||!!closed||busy;
 }
 
+
 function renderRecords(){
- let list=orders.filter(o=>o.menu_date===key(selected)).sort((a,b)=>a.created_at.localeCompare(b.created_at));
+ let list=orders
+   .filter(o=>o.menu_date===key(selected))
+   .sort((a,b)=>a.created_at.localeCompare(b.created_at));
+
  $('count').textContent=`${list.length}명 선택`;
- $('records').innerHTML=list.length?list.map(o=>`<div class="record"><div><div class="record-name">${esc(o.name)}</div><div class="record-menu">${esc(o.menu_name)}</div></div><span class="record-cat">${esc(o.category)}</span></div>`).join(''):'<div class="empty">아직 선택한 사람이 없습니다.</div>';
+
+ // 메뉴별 주문 수량 계산
+ const totals=Object.entries(
+   list.reduce((acc,o)=>{
+     const name=o.menu_name||'메뉴 미지정';
+     acc[name]=(acc[name]||0)+1;
+     return acc;
+   },{})
+ ).sort((a,b)=>a[0].localeCompare(b[0],'ko'));
+
+ const recordsHtml=list.length
+   ?list.map(o=>`
+     <div class="record">
+       <div>
+         <div class="record-name">${esc(o.name)}</div>
+         <div class="record-menu">${esc(o.menu_name)}</div>
+       </div>
+       <span class="record-cat">${esc(o.category)}</span>
+     </div>
+   `).join('')
+   : '<div class="empty">아직 선택한 사람이 없습니다.</div>';
+
+ // 메뉴별 합계 영역
+ const summaryHtml=totals.length
+   ? `
+     <div style="
+       margin-top:16px;
+       padding:16px;
+       background:#fff8f0;
+       border-radius:12px;
+     ">
+       <div style="
+         font-size:16px;
+         font-weight:bold;
+         margin-bottom:12px;
+       ">📋 메뉴별 합계</div>
+
+       ${totals.map(([name,count])=>`
+         <div style="
+           display:flex;
+           justify-content:space-between;
+           align-items:center;
+           padding:7px 0;
+           border-bottom:1px solid #eee0d5;
+           font-size:14px;
+         ">
+           <span>${esc(name)}</span>
+           <b>x${count}</b>
+         </div>
+       `).join('')}
+     </div>
+   `
+   : '';
+
+ $('records').innerHTML=recordsHtml+summaryHtml;
 }
+
 function renderAdmin(){
  $('adminState').textContent=admin?'관리자 로그인':'로그아웃';
  $('adminLogin').hidden=admin;$('adminTools').hidden=!admin;
