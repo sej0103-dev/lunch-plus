@@ -374,7 +374,7 @@ const totals=Object.entries(
          font-size:16px;
          font-weight:bold;
          margin-bottom:12px;
-       ">📋 메뉴별 합계</div>
+      ">📋 ${fmt(selected)} (${day(selected)}요일) 메뉴별 합계</div>
 
        ${totals.map(([name,count])=>`
          <div style="
