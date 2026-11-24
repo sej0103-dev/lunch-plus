@@ -12,7 +12,12 @@ const employeeNames=[
   '임소리'
 ];
 
+let selectedPerson='';
+
 const person=()=>selectedPerson;
+
+const normalized=n=>n.trim().replace(/\s+/g,' ').toLocaleLowerCase('ko-KR');
+const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
 const menu={
 '월':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['케이준 치킨 샐러드','새우 샐러드','연어롤 샐러드'],'샌드위치':['어니언 크래미 샌드위치','떡갈비 샌드위치'],'하프&하프':['샐러드 + 어니언 크래미 1/2','샐러드 + 떡갈비 1/2']},
 '화':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['리코타치즈 샐러드','또띠아 샐러드','매콤소불고기 포케'],'샌드위치':['통새우 샌드위치','매콤닭가슴살 샌드위치'],'하프&하프':['샐러드 + 통새우 1/2','샐러드 + 매콤닭가슴살 1/2']},
