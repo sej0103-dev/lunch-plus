@@ -420,6 +420,7 @@ const totals=Object.entries(
         display:flex;
         justify-content:flex-start;
         align-items:center;
+        gap:12px;
         margin-top:12px;
         padding-top:12px;
         border-top:2px solid #eadfd2;
