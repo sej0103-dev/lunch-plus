@@ -243,8 +243,7 @@ function renderMenus(){
        <div style="
          display:flex;
          align-items:center;
-         gap:12px;
-         justify-content:flex-start;
+         justify-content:space-between;
          width:100%;
          min-height:170px;
          background:#fff1f1;
@@ -419,7 +418,7 @@ const totals=Object.entries(
 
       <div style="
         display:flex;
-        justify-content:space-between;
+        justify-content:flex-start;
         align-items:center;
         margin-top:12px;
         padding-top:12px;
