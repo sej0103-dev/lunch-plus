@@ -17,7 +17,11 @@ let selectedPerson='';
 const person=()=>selectedPerson;
 
 const normalized=n=>n.trim().replace(/\s+/g,' ').toLocaleLowerCase('ko-KR');
-const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
+
+const mine=()=>orders.find(o=>
+  o.menu_date===key(selected)&&
+  o.normalized_name===normalized(person())
+);
   
 const menu={
 '월':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['케이준 치킨 샐러드','새우 샐러드','연어롤 샐러드'],'샌드위치':['어니언 크래미 샌드위치','떡갈비 샌드위치'],'하프&하프':['샐러드 + 어니언 크래미 1/2','샐러드 + 떡갈비 1/2']},
@@ -165,7 +169,6 @@ if(today.getDay()===0||today.getDay()===6){
   selected=new Date(today);
 }
 ;
-const normalized=n=>n.trim().replace(/\s+/g,' ').toLocaleLowerCase('ko-KR');
 const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
 function toast(s){let t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
 function renderEmployees(){
