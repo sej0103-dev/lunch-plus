@@ -347,10 +347,9 @@ let list=orders
     // 개인 휴무는 항상 맨 위로!
     if(aOff!==bOff) return aOff ? -1 : 1;
 
-    // 같은 그룹 안에서는 기존 주문 순서 유지
-    return a.created_at.localeCompare(b.created_at);
+    // 같은 그룹 안에서는 이름순(가나다순)
+    return a.name.localeCompare(b.name,'ko');
   });
-
 
  $('count').textContent=`${list.length}명 선택`;
 
