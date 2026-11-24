@@ -169,7 +169,6 @@ if(today.getDay()===0||today.getDay()===6){
   selected=new Date(today);
 }
 ;
-const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
 function toast(s){let t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
 function renderEmployees(){
   $('employees').innerHTML=employeeNames.map(name=>`
