@@ -1,6 +1,18 @@
 (() => {
 const $=id=>document.getElementById(id);
 const days=['월','화','수','목','금'];
+const employeeNames=[
+  '안수진',
+  '신은정',
+  '이주희',
+  '이연주',
+  '김도은',
+  '이종현',
+  '김중현',
+  '임소리'
+];
+
+let selectedPerson='';
 const menu={
 '월':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['케이준 치킨 샐러드','새우 샐러드','연어롤 샐러드'],'샌드위치':['어니언 크래미 샌드위치','떡갈비 샌드위치'],'하프&하프':['샐러드 + 어니언 크래미 1/2','샐러드 + 떡갈비 1/2']},
 '화':{'도시락':['오늘의 도시락'],'샐러드 & 포케':['리코타치즈 샐러드','또띠아 샐러드','매콤소불고기 포케'],'샌드위치':['통새우 샌드위치','매콤닭가슴살 샌드위치'],'하프&하프':['샐러드 + 통새우 1/2','샐러드 + 매콤닭가슴살 1/2']},
@@ -136,11 +148,30 @@ let db=null,orders=[],settings={},category='도시락',choice='오늘의 도시�
 const today=new Date();today.setHours(0,0,0,0);
 let week=monday(today);if(today.getDay()===0||today.getDay()===6)week=add(week,7);
 let selected=new Date(week);
-const person=()=>$('person').value.trim().replace(/\s+/g,' ');
+const person=()=>selectedPerson;
 const normalized=n=>n.trim().replace(/\s+/g,' ').toLocaleLowerCase('ko-KR');
 const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
 function toast(s){let t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+function renderEmployees(){
+  $('employees').innerHTML=employeeNames.map(name=>`
+    <button
+      type="button"
+      class="employee-btn ${selectedPerson===name?'selected':''}"
+      data-name="${esc(name)}"
+      aria-pressed="${selectedPerson===name}"
+    >
+      ${esc(name)}
+      ${selectedPerson===name?' ✓':''}
+    </button>
+  `).join('');
 
+  $('employees').querySelectorAll('.employee-btn').forEach(b=>{
+    b.onclick=()=>{
+      selectedPerson=b.dataset.name;
+      render();
+    };
+  });
+}
 function renderWeek(){
  $('weeklabel').textContent=`${fmt(week)} – ${fmt(add(week,4))}`;
 
@@ -378,7 +409,16 @@ function renderAdmin(){
  $('adminOrderList').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>cancelOrder(b.dataset.del));
  $('adminOrderList').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>editOrder(b.dataset.id));
 }
-function render(){ $('dateheading').textContent=`${day(selected)}요일 메뉴`; $('datepill').textContent=fmt(selected);renderWeek();renderMenus();renderNotice();renderRecords();renderAdmin()}
+function render(){
+  $('dateheading').textContent=`${day(selected)}요일 메뉴`;
+  $('datepill').textContent=fmt(selected);
+  renderEmployees();
+  renderWeek();
+  renderMenus();
+  renderNotice();
+  renderRecords();
+  renderAdmin();
+}
 
 async function ensureDirectorOrders(){
   const directorName='원장님';
@@ -547,7 +587,6 @@ async function init(){
   await load();
   db.channel('lunch-live').on('postgres_changes',{event:'*',schema:'public',table:'lunch_orders'},load).on('postgres_changes',{event:'*',schema:'public',table:'lunch_date_settings'},load).subscribe();
  }
- $('person').addEventListener('input',render);
  $('prev').onclick=()=>{week=add(week,-7);selected=add(selected,-7);render();load()};
  $('next').onclick=()=>{week=add(week,7);selected=add(selected,7);render();load()};
 
