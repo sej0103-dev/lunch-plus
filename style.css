@@ -34,3 +34,36 @@ footer{display:flex;justify-content:space-between;color:#9aa39d;font-size:10px;p
   background: #fff0f0 !important;
   font-weight: 700;
 }
+
+/* 직원 이름 선택 버튼 */
+.employee-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.employee-btn {
+  min-width: 0;
+  padding: 14px 4px;
+  border: 1px solid #dce5df;
+  border-radius: 12px;
+  background: #f7faf8;
+  color: #29483b;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.employee-btn:hover {
+  background: #eaf2ed;
+  border-color: #8eaa98;
+}
+
+.employee-btn.selected {
+  background: #173c32;
+  border-color: #173c32;
+  color: white;
+}
