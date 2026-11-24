@@ -247,9 +247,9 @@ function renderMenus(){
   width:100%;
   min-height:170px;
   font-size:48px;
+  background:#fff0f0;
+  border-radius:12px 12px 0 0;
 ">
-  🏖️
-</div>
        <div class="menuinfo">
          <div class="menuname">개인 휴무</div>
          <div class="pick">${choice==='휴무'?'✓ 선택됨':'휴무 선택하기 →'}</div>
