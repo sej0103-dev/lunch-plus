@@ -240,16 +240,16 @@ function renderMenus(){
  if(isPersonalLeave){
    $('menulist').innerHTML=`
      <button class="menu ${choice==='휴무'?'selected':''}" data-menu="휴무">
-       <div style="
-         display:flex;
-         align-items:center;
-         justify-content:center;
-         width:100%;
-         min-height:170px;
-         background:#fff1f1;
-         border-radius:12px;
-         font-size:48px;
-       ">🏖️</div>
+<div style="
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:170px;
+  font-size:48px;
+">
+  🏖️
+</div>
        <div class="menuinfo">
          <div class="menuname">개인 휴무</div>
          <div class="pick">${choice==='휴무'?'✓ 선택됨':'휴무 선택하기 →'}</div>
