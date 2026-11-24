@@ -13,10 +13,13 @@
 <header class="top"><div class="brand"><span class="brandmark">🍴</span><span>LUNCH <b>PLUS</b></span></div><span class="topnote">WEEKLY MENU · ORDER</span></header>
 <main class="wrap">
 <section class="hero"><div class="eyebrow">WOORI FOOD · WEEKLY MENU</div><h1>오늘 점심은<br class="mobile"> 무엇으로 할까요?</h1><p>이름을 입력하고 요일별 메뉴를 선택해 주세요.</p></section>
+
 <section class="namebox card">
- <label for="person">이름</label><div class="namefield"><input id="person" maxlength="30" autocomplete="name" placeholder="이름을 입력해 주세요"><span class="lock">1인 1일 1메뉴</span></div>
- <p class="hint">같은 날짜에는 동일한 이름으로 한 번만 선택할 수 있습니다.</p>
+  <label>직원 이름 선택</label>
+  <div id="employees" class="employee-grid"></div>
+  <p class="hint">이름을 선택한 후 원하는 날짜와 메뉴를 골라 주세요. 1인 1일 1메뉴입니다.</p>
 </section>
+
 <section class="card weekcard">
  <div class="week-head"><button id="prev" class="arrow" aria-label="이전 주">‹</button><div><div id="weeklabel" class="weeklabel"></div><div class="weekcaption">월요일 – 금요일</div></div><button id="next" class="arrow" aria-label="다음 주">›</button></div>
  <div id="days" class="days"></div>
