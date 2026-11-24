@@ -414,8 +414,22 @@ const totals=Object.entries(
            <span>${esc(name)}</span>
            <b>x${count}</b>
          </div>
-       `).join('')}
-     </div>
+      `).join('')}
+
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-top:12px;
+        padding-top:12px;
+        border-top:2px solid #eadfd2;
+        font-size:15px;
+        font-weight:bold;
+      ">
+        <span>총 주문 수</span>
+        <b>${totals.reduce((sum,[name,count])=>sum+count,0)}개</b>
+      </div>
+      </div>
    `
    : '';
 
