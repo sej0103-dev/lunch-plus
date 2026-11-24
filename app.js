@@ -243,7 +243,7 @@ function renderMenus(){
        <div style="
          display:flex;
          align-items:center;
-         justify-content:space-between;
+         justify-content:center;
          width:100%;
          min-height:170px;
          background:#fff1f1;
