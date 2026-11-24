@@ -362,7 +362,14 @@ const totals=Object.entries(
      acc[name]=(acc[name]||0)+1;
      return acc;
    },{})
- ).sort((a,b)=>a[0].localeCompare(b[0],'ko'));
+).sort((a,b)=>{
+  const aLunch=a[0]==='오늘의 도시락';
+  const bLunch=b[0]==='오늘의 도시락';
+
+  if(aLunch!==bLunch) return aLunch ? -1 : 1;
+
+  return a[0].localeCompare(b[0],'ko');
+});
 
 
  const recordsHtml=list.length
