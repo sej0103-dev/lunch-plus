@@ -145,10 +145,20 @@ const lunchMenusByWeek = {
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const config=window.LUNCH_CONFIG||{};
 let db=null,orders=[],settings={},category='도시락',choice='오늘의 도시락',admin=false,busy=false;
-const today=new Date();today.setHours(0,0,0,0);
-let week=monday(today);if(today.getDay()===0||today.getDay()===6)week=add(week,7);
-let selected=new Date(week);
-const person=()=>selectedPerson;
+
+const today=new Date();
+today.setHours(0,0,0,0);
+
+let week=monday(today);
+let selected;
+
+if(today.getDay()===0||today.getDay()===6){
+  week=add(week,7);
+  selected=new Date(week);
+}else{
+  selected=new Date(today);
+}
+;
 const normalized=n=>n.trim().replace(/\s+/g,' ').toLocaleLowerCase('ko-KR');
 const mine=()=>orders.find(o=>o.menu_date===key(selected)&&o.normalized_name===normalized(person()));
 function toast(s){let t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
