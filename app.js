@@ -552,7 +552,7 @@ const staffSummaryHtml = `
 `;
 
 $('records').innerHTML =
-  recordsHtml + staffSummaryHtml + summaryHtml;
+  staffSummaryHtml + recordsHtml + summaryHtml;
 
 }
 
