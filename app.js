@@ -484,7 +484,76 @@ const totals=Object.entries(
    `
    : '';
 
- $('records').innerHTML=recordsHtml+summaryHtml;
+
+const staffNames = [
+  '원장님',
+  '신은정',
+  '안수진',
+  '이주희',
+  '이연주',
+  '임소리',
+  '윤중현',
+  '이종현',
+  '김도은'
+];
+
+const selectedNameSet = new Set(
+  list.map(o => normalized(o.name))
+);
+
+const missingNames = staffNames.filter(
+  name => !selectedNameSet.has(normalized(name))
+);
+
+const staffSummaryHtml = `
+  <div style="
+    margin-top:12px;
+    padding:14px 16px;
+    background:#f0f7f3;
+    border-radius:12px;
+    font-size:14px;
+  ">
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+      font-weight:700;
+    ">
+      <span>👥 전체 직원</span>
+      <span>${staffNames.length}명</span>
+    </div>
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+      font-weight:700;
+    ">
+      <span>미선택</span>
+      <span style="color:#e05252;">
+        ${missingNames.length}명
+      </span>
+    </div>
+
+    <div style="
+      color:#e05252;
+      line-height:1.8;
+      font-weight:600;
+    ">
+      ${
+        missingNames.length
+          ? missingNames.map(name => esc(name)).join(' · ')
+          : '모든 직원이 선택했어요 🎉'
+      }
+    </div>
+  </div>
+`;
+
+$('records').innerHTML =
+  recordsHtml + staffSummaryHtml + summaryHtml;
+
 }
 
 function renderAdmin(){
